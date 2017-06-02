@@ -1,8 +1,8 @@
 {
     "config": {
         "network-interface":{
-            "help": "Options are ETHERNET, WIFI_ESP8266, WIFI_ODIN, MESH_LOWPAN_ND, MESH_THREAD",
-            "value": "ETHERNET"
+            "help": "Options are ETHERNET, CELL_C027",
+            "value": "CELL_C027"
         },
          "wifi-ssid": {
             "help": "WiFi SSID",
@@ -22,7 +22,7 @@
         },
         "cell-apn": {
             "help": "Cellular APN",
-            "value": "internet"
+            "value": "\"internet\""
         }
     }
 }
