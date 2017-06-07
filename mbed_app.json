@@ -1,28 +1,15 @@
 {
     "config": {
-        "network-interface":{
-            "help": "Options are ETHERNET, CELL_C027",
-            "value": "CELL_C027"
+        "header-file": {
+            "help" : "String for including your driver header file",
+            "value" : "\"C027Interface.h\""
         },
-         "wifi-ssid": {
-            "help": "WiFi SSID",
-            "value": "\"SSID\""
+        "object-construction" : {
+            "value" : "new C027Interface()"
         },
-        "wifi-password": {
-            "help": "WiFi Password",
-            "value": "\"Password\""
-        },
-        "wifi-tx": {
-            "help": "TX pin for serial connection to external device",
-            "value": "D1"
-        },
-        "wifi-rx": {
-            "help": "RX pin for serial connection to external device",
-            "value": "D0"
-        },
-        "cell-apn": {
-            "help": "Cellular APN",
-            "value": "\"internet\""
+        "connect-statement" : {
+            "help" : "Must use 'net' variable name",
+            "value" : "((C027Interface *)net)->connect(\"internet\")"
         }
     }
 }
