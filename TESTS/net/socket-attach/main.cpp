@@ -66,6 +66,16 @@ void get_data(TCPSocket* sock){
     recvd.release();
 }
 
+void prep_buffer() {
+    memset(buffer, 0, sizeof(buffer));
+    // We are constructing GET command like this:
+    // GET http://developer.mbed.org/media/uploads/mbed_official/hello.txt HTTP/1.0\n\n
+    strcpy(buffer, "GET http://");
+    strcat(buffer, HTTP_SERVER_NAME);
+    strcat(buffer, HTTP_SERVER_FILE_PATH);
+    strcat(buffer, " HTTP/1.0\n\n");
+}
+
 void test_socket_attach() {
     // Dispatch event queue
     Thread eventThread;
@@ -80,18 +90,45 @@ void test_socket_attach() {
     if (sock.connect(HTTP_SERVER_NAME, HTTP_SERVER_PORT) == 0) {
         printf("HTTP: OK\r\n");
 
-        // We are constructing GET command like this:
-        // GET http://developer.mbed.org/media/uploads/mbed_official/hello.txt HTTP/1.0\n\n
-        strcpy(buffer, "GET http://");
-        strcat(buffer, HTTP_SERVER_NAME);
-        strcat(buffer, HTTP_SERVER_FILE_PATH);
-        strcat(buffer, " HTTP/1.0\n\n");
+        prep_buffer();
         // Attach a sigio function that adds function to event queue
         sock.sigio(queue.event(get_data, &sock));
         // Send GET command
         sock.send(buffer, strlen(buffer));
         // wait for recv data
         recvd.wait();
+    } else {
+        printf("HTTP: ERROR\r\n");
+    }
+    net->disconnect();
+}
+
+void cb_fail_test() {
+    TEST_ASSERT(false);
+}
+
+void test_socket_detach() {
+    // Dispatch event queue
+    Thread eventThread;
+    eventThread.start(callback(&queue, &EventQueue::dispatch_forever));
+
+    NetworkInterface* net = get_net();
+    net_connect(net);
+    printf("TCP client IP Address is %s\r\n", net->get_ip_address());
+
+    TCPSocket sock(net);
+    printf("HTTP: Connection to %s:%d\r\n", HTTP_SERVER_NAME, HTTP_SERVER_PORT);
+    if (sock.connect(HTTP_SERVER_NAME, HTTP_SERVER_PORT) == 0) {
+        printf("HTTP: OK\r\n");
+
+        prep_buffer();
+        // Attach a sigio function that adds function to event queue
+        sock.sigio(queue.event(cb_fail_test));
+        // Detach function
+        sock.sigio(NULL);
+        // Send GET command
+        sock.send(buffer, strlen(buffer));
+        wait(5);
     } else {
         printf("HTTP: ERROR\r\n");
     }
@@ -107,6 +144,7 @@ utest::v1::status_t test_setup(const size_t number_of_cases) {
 
 Case cases[] = {
     Case("Socket Attach Test", test_socket_attach),
+    Case("Socket Detach Test", test_socket_detach),
 };
 
 Specification specification(test_setup, cases);
