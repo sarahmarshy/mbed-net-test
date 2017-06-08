@@ -19,11 +19,7 @@ void test_bring_up_down() {
         TEST_ASSERT_EQUAL(0, err);
 
         printf("MBED: IP Address %s\r\n", net->get_ip_address());
-        printf("MBED: Netmask %s\r\n", net->get_netmask());
-        printf("MBED: Gateway %s\r\n", net->get_gateway());
         TEST_ASSERT(net->get_ip_address());
-        TEST_ASSERT(net->get_netmask());
-        TEST_ASSERT(net->get_gateway());
 
         UDPSocket udp;
         err = udp.open(net);
