@@ -1,5 +1,5 @@
 #include "mbed.h"
-#include "net-help.h"
+#include MBED_CONF_APP_HEADER_FILE
 #include "TCPSocket.h"
 #include "greentea-client/test_env.h"
 #include "unity/unity.h"
@@ -29,9 +29,9 @@ void prep_buffer(char *tx_buffer, size_t tx_size) {
 }
 
 void test_tcp_echo() {
-    
-    NetworkInterface* net = get_net();
-    int err = net_connect(net);
+
+    NetworkInterface* net = MBED_CONF_APP_OBJECT_CONSTRUCTION;
+    int err =  MBED_CONF_APP_CONNECT_STATEMENT;
 
     if (err) {
         printf("MBED: failed to connect with an error of %d\r\n", err);

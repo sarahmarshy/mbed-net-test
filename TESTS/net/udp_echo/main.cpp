@@ -1,5 +1,5 @@
 #include "mbed.h"
-#include "net-help.h"
+#include MBED_CONF_APP_HEADER_FILE
 #include "UDPSocket.h"
 #include "greentea-client/test_env.h"
 #include "unity/unity.h"
@@ -39,8 +39,8 @@ void prep_buffer(char *uuid, char *tx_buffer, size_t tx_size) {
 
 void test_udp_echo() {
 
-    NetworkInterface* net = get_net();
-    int err = net_connect(net);
+    NetworkInterface* net = MBED_CONF_APP_OBJECT_CONSTRUCTION;
+    int err =  MBED_CONF_APP_CONNECT_STATEMENT;
 
     TEST_ASSERT_EQUAL(0, err);
 

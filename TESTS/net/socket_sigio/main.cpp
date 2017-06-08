@@ -1,6 +1,6 @@
 #include <algorithm>
 #include "mbed.h"
-#include "net-help.h"
+#include MBED_CONF_APP_HEADER_FILE
 #include "TCPSocket.h"
 #include "greentea-client/test_env.h"
 #include "unity/unity.h"
@@ -27,7 +27,13 @@ namespace {
     char buffer[RECV_BUFFER_SIZE] = {0};
 
     Semaphore recvd;
-    EventQueue queue;
+    NetworkInterface *net;
+}
+
+void net_bringup() {
+    net = MBED_CONF_APP_OBJECT_CONSTRUCTION;
+    int err =  MBED_CONF_APP_CONNECT_STATEMENT;
+    TEST_ASSERT_EQUAL(0, err);
 }
 
 bool find_substring(const char *first, const char *last, const char *s_first, const char *s_last) {
@@ -61,7 +67,6 @@ void get_data(TCPSocket* sock){
     printf("HTTP: Received '%s' status ... %s\r\n", HTTP_HELLO_STR, found_hello ? "[OK]" : "[FAIL]");
     printf("HTTP: Received message:\r\n");
     printf("%s", buffer);
-    sock->close();
     // Signal that we have recvd
     recvd.release();
 }
@@ -79,10 +84,9 @@ void prep_buffer() {
 void test_socket_attach() {
     // Dispatch event queue
     Thread eventThread;
+    EventQueue queue;
     eventThread.start(callback(&queue, &EventQueue::dispatch_forever));
 
-    NetworkInterface* net = get_net();
-    net_connect(net);
     printf("TCP client IP Address is %s\r\n", net->get_ip_address());
 
     TCPSocket sock(net);
@@ -100,7 +104,7 @@ void test_socket_attach() {
     } else {
         printf("HTTP: ERROR\r\n");
     }
-    net->disconnect();
+    sock.close();
 }
 
 void cb_fail() {
@@ -114,10 +118,9 @@ void cb_pass() {
 void test_socket_detach() {
     // Dispatch event queue
     Thread eventThread;
+    EventQueue queue;
     eventThread.start(callback(&queue, &EventQueue::dispatch_forever));
 
-    NetworkInterface* net = get_net();
-    net_connect(net);
     printf("TCP client IP Address is %s\r\n", net->get_ip_address());
 
     TCPSocket sock(net);
@@ -136,16 +139,15 @@ void test_socket_detach() {
     } else {
         printf("HTTP: ERROR\r\n");
     }
-    net->disconnect();
+    sock.close();
 }
 
 void test_socket_reattach() {
     // Dispatch event queue
     Thread eventThread;
+    EventQueue queue;
     eventThread.start(callback(&queue, &EventQueue::dispatch_forever));
 
-    NetworkInterface* net = get_net();
-    net_connect(net);
     printf("TCP client IP Address is %s\r\n", net->get_ip_address());
 
     TCPSocket sock(net);
@@ -165,13 +167,14 @@ void test_socket_reattach() {
     } else {
         printf("HTTP: ERROR\r\n");
     }
-    net->disconnect();
+    sock.close();
 }
 
 
 // Test setup
 utest::v1::status_t test_setup(const size_t number_of_cases) {
     GREENTEA_SETUP(120, "default_auto");
+    net_bringup();
     return verbose_test_setup_handler(number_of_cases);
 }
 

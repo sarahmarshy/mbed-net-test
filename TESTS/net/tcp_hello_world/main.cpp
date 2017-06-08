@@ -1,6 +1,6 @@
 #include <algorithm>
 #include "mbed.h"
-#include "net-help.h"
+#include MBED_CONF_APP_HEADER_FILE
 #include "TCPSocket.h"
 #include "greentea-client/test_env.h"
 #include "unity/unity.h"
@@ -34,8 +34,8 @@ bool find_substring(const char *first, const char *last, const char *s_first, co
 
 void test_tcp_hello_world() {
     bool result = false;
-    NetworkInterface* net = get_net();
-    net_connect(net);
+    NetworkInterface* net = MBED_CONF_APP_OBJECT_CONSTRUCTION;
+    MBED_CONF_APP_CONNECT_STATEMENT;
     printf("TCP client IP Address is %s\r\n", net->get_ip_address());
 
     TCPSocket sock(net);
@@ -96,4 +96,3 @@ Specification specification(test_setup, cases);
 int main() {
     return !Harness::run(specification);
 }
-

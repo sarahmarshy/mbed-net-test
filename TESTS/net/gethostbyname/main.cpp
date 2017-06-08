@@ -2,7 +2,7 @@
 #include "greentea-client/test_env.h"
 #include "unity.h"
 #include "utest.h"
-#include "net-help.h"
+#include MBED_CONF_APP_HEADER_FILE
 
 using namespace utest::v1;
 
@@ -22,8 +22,8 @@ const char *ip_pref_repr;
 NetworkInterface *net;
 
 void net_bringup() {
-    net = get_net();
-    int err = net_connect(net);
+    net = MBED_CONF_APP_OBJECT_CONSTRUCTION;
+    int err =  MBED_CONF_APP_CONNECT_STATEMENT;
     TEST_ASSERT_EQUAL(0, err);
     printf("MBED: Connected to network\n");
     printf("MBED: IP Address: %s\n", net->get_ip_address());

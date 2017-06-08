@@ -1,5 +1,5 @@
 #include "mbed.h"
-#include "net-help.h"
+#include MBED_CONF_APP_HEADER_FILE
 #include "UDPSocket.h"
 #include "greentea-client/test_env.h"
 #include "unity/unity.h"
@@ -30,8 +30,8 @@ int udp_dtls_handshake_pattern[] = {MBED_CFG_UDP_DTLS_HANDSHAKE_PATTERN};
 const int udp_dtls_handshake_count = sizeof(udp_dtls_handshake_pattern) / sizeof(int);
 
 void test_udp_dtls_handshake() {
-    NetworkInterface* net = get_net();
-    int err = net_connect(net);
+    NetworkInterface* net = MBED_CONF_APP_OBJECT_CONSTRUCTION;
+    int err =  MBED_CONF_APP_CONNECT_STATEMENT;
     TEST_ASSERT_EQUAL(0, err);
 
     printf("MBED: UDPClient IP address is '%s'\n", net->get_ip_address());
@@ -142,4 +142,3 @@ Specification specification(test_setup, cases);
 int main() {
     return !Harness::run(specification);
 }
-

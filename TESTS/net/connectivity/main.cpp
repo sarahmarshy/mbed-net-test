@@ -2,20 +2,17 @@
 #include "greentea-client/test_env.h"
 #include "unity.h"
 #include "utest.h"
-
-#include "net-help.h"
+#include MBED_CONF_APP_HEADER_FILE
 
 using namespace utest::v1;
-
-
 
 // Bringing the network up and down
 template <int COUNT>
 void test_bring_up_down() {
-    NetworkInterface* net = get_net();
+    NetworkInterface* net = MBED_CONF_APP_OBJECT_CONSTRUCTION;
 
     for (int i = 0; i < COUNT; i++) {
-        int err = net_connect(net);
+        int err = MBED_CONF_APP_CONNECT_STATEMENT;
         TEST_ASSERT_EQUAL(0, err);
 
         printf("MBED: IP Address %s\r\n", net->get_ip_address());
