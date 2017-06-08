@@ -103,8 +103,12 @@ void test_socket_attach() {
     net->disconnect();
 }
 
-void cb_fail_test() {
+void cb_fail() {
     TEST_ASSERT(false);
+}
+
+void cb_pass() {
+    recvd.release();
 }
 
 void test_socket_detach() {
@@ -123,12 +127,41 @@ void test_socket_detach() {
 
         prep_buffer();
         // Attach a sigio function that adds function to event queue
-        sock.sigio(queue.event(cb_fail_test));
+        sock.sigio(queue.event(cb_fail));
         // Detach function
         sock.sigio(NULL);
         // Send GET command
         sock.send(buffer, strlen(buffer));
         wait(5);
+    } else {
+        printf("HTTP: ERROR\r\n");
+    }
+    net->disconnect();
+}
+
+void test_socket_reattach() {
+    // Dispatch event queue
+    Thread eventThread;
+    eventThread.start(callback(&queue, &EventQueue::dispatch_forever));
+
+    NetworkInterface* net = get_net();
+    net_connect(net);
+    printf("TCP client IP Address is %s\r\n", net->get_ip_address());
+
+    TCPSocket sock(net);
+    printf("HTTP: Connection to %s:%d\r\n", HTTP_SERVER_NAME, HTTP_SERVER_PORT);
+    if (sock.connect(HTTP_SERVER_NAME, HTTP_SERVER_PORT) == 0) {
+        printf("HTTP: OK\r\n");
+
+        prep_buffer();
+        // Attach a sigio function that adds function to event queue
+        sock.sigio(queue.event(cb_fail));
+        // Override previous attach
+        sock.sigio(queue.event(cb_pass));
+        // Send GET command
+        sock.send(buffer, strlen(buffer));
+        recvd.wait();
+        TEST_ASSERT(true);
     } else {
         printf("HTTP: ERROR\r\n");
     }
@@ -145,6 +178,7 @@ utest::v1::status_t test_setup(const size_t number_of_cases) {
 Case cases[] = {
     Case("Socket Attach Test", test_socket_attach),
     Case("Socket Detach Test", test_socket_detach),
+    Case("Socket Reattach Test", test_socket_reattach),
 };
 
 Specification specification(test_setup, cases);
