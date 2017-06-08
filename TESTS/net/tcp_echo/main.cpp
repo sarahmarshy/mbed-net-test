@@ -18,7 +18,7 @@ using namespace utest::v1;
 
 namespace {
     char tx_buffer[MBED_CFG_TCP_CLIENT_ECHO_BUFFER_SIZE] = {0};
-    char rx_buffer[MBED_CFG_TCP_CLIENT_ECHO_BUFFER_SIZE + sizeof(MBED_CFG_TCP_PREFIX)] = {0};
+    char rx_buffer[MBED_CFG_TCP_CLIENT_ECHO_BUFFER_SIZE] = {0};
     const char ASCII_MAX = '~' - ' ';
 }
 
@@ -60,22 +60,23 @@ void test_tcp_echo() {
         printf("rx_buffer buffer size: %u\r\n", sizeof(rx_buffer));
 
         prep_buffer(tx_buffer, sizeof(tx_buffer));
+        int n = sock.recv(rx_buffer, sizeof(MBED_CFG_TCP_PREFIX));
         const int ret = sock.send(tx_buffer, sizeof(tx_buffer));
         if (ret >= 0) {
             printf("sent %d bytes - %.*s  \n", ret, ret, tx_buffer);
         } else {
             printf("Network error %d\n", ret);
         }
-        // Server will respond with HTTP GET's success code
-        const int n = sock.recv(rx_buffer, sizeof(rx_buffer) + sizeof(MBED_CFG_TCP_PREFIX));
+
+        n = sock.recv(rx_buffer, sizeof(rx_buffer));
         if (n >= 0) {
             printf("recv %d bytes - %.*s  \n", n, n, rx_buffer);
         } else {
             printf("Network error %d\n", n);
         }
 
-        result = !memcmp(tx_buffer, rx_buffer+sizeof(MBED_CFG_TCP_PREFIX), sizeof(tx_buffer));
-        TEST_ASSERT_EQUAL(ret, sizeof(rx_buffer) - sizeof(MBED_CFG_TCP_PREFIX));
+        result = !memcmp(tx_buffer, rx_buffer, sizeof(tx_buffer));
+        TEST_ASSERT_EQUAL(ret, sizeof(rx_buffer));
         TEST_ASSERT_EQUAL(true, result);
     }
 
